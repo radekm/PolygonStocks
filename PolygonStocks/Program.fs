@@ -5,16 +5,15 @@ open System.IO
 
 open Model
 
-// TODO Move `tickers` to db.
 // Returns queued tickers already attached to `ctx`.
-let fetchQueuedTickers (tickers : Ticker[]) (ctx : PolygonContext) =
+let fetchQueuedTickers (ctx : PolygonContext) =
     let queued = ctx.QueuedTickers |> Seq.toArray
     if queued |> Array.isEmpty |> not
     then queued
     else
         // Queue is empty.
         // Let's fill it with all active tickers.
-        let allTickers = tickers |> Array.map (fun t -> t.Ticker)
+        let allTickers = ctx.Tickers |> Seq.map (fun t -> t.Ticker) |> Seq.toArray
         let inactiveTickers = ctx.InactiveTickers |> Seq.map (fun t -> t.Ticker) |> Set.ofSeq
         let queued = 
             allTickers
@@ -32,15 +31,17 @@ let main argv =
     
     let dataDir = "Data"
     let exchangesFile = Path.Join(dataDir, "exchanges.json")
-    let tickersFile = Path.Join(dataDir, "tickers.json")
+
+    use ctx = new PolygonContext()
 
     match argv.[1] with
     | "download-exchanges" ->
         Download.downloadExchanges apiKey
         |> Serde.write exchangesFile
     | "download-tickers" ->
-        Download.downloadTickers apiKey
-        |> Serde.write tickersFile
+        ctx.Tickers.RemoveRange(ctx.Tickers)
+        Download.downloadTickers apiKey |> ctx.Tickers.AddRange
+        ctx.SaveChanges() |> ignore
     | "download-aggregates" ->
         let fromDay, toDay =
             let toDay = DateTime.UtcNow.Date
@@ -48,12 +49,7 @@ let main argv =
             fromDay, toDay
         printfn $"To download %A{fromDay} - %A{toDay}"
 
-        let tickers : Ticker[] = Serde.read tickersFile
-        printfn $"Loaded %d{tickers.Length} tickers from %s{tickersFile}"
-        
-        use ctx = new PolygonContext()
-
-        let queued = fetchQueuedTickers tickers ctx
+        let queued = fetchQueuedTickers ctx
         printfn "Found %d queued tickers" queued.Length
         
         for qt in queued do

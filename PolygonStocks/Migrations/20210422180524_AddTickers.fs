@@ -9,10 +9,55 @@ open Microsoft.EntityFrameworkCore.Migrations
 open Microsoft.EntityFrameworkCore.Storage.ValueConversion
 
 [<DbContext(typeof<Model.PolygonContext>)>]
-type PolygonContextModelSnapshot() =
-    inherit ModelSnapshot()
+[<Migration("20210422180524_AddTickers")>]
+type AddTickers() =
+    inherit Migration()
 
-    override this.BuildModel(modelBuilder: ModelBuilder) =
+    override this.Up(migrationBuilder:MigrationBuilder) =
+        migrationBuilder.CreateTable(
+            name = "Tickers"
+            ,columns = (fun table -> 
+            {|
+                Ticker =
+                    table.Column<string>(
+                        nullable = false
+                        ,``type`` = "TEXT"
+                    )
+                Name =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+                Locale =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+                Currency =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+                PrimaryExchange =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+            |})
+            ,constraints =
+                (fun table -> 
+                    table.PrimaryKey("PK_Tickers", (fun x -> (x.Ticker) :> obj)) |> ignore
+                ) 
+        ) |> ignore
+
+
+    override this.Down(migrationBuilder:MigrationBuilder) =
+        migrationBuilder.DropTable(
+            name = "Tickers"
+            ) |> ignore
+
+
+    override this.BuildTargetModel(modelBuilder: ModelBuilder) =
         modelBuilder
             .HasAnnotation("ProductVersion", "5.0.5")
             |> ignore

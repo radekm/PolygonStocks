@@ -31,7 +31,8 @@ type Exchange = { Name : string
                   PolygonCode : string option
                 }
 
-type Ticker = { Ticker : string
+[<CLIMutable>]
+type Ticker = { [<Key>] Ticker : string
                 Name : string
                 Locale : string
                 Currency : string
@@ -59,6 +60,9 @@ type QueuedTicker = { [<Key>] Ticker : string }
 
 type PolygonContext() =  
     inherit DbContext()
+
+    [<DefaultValue>] val mutable tickers : DbSet<Ticker>
+    member me.Tickers with get() = me.tickers and set v = me.tickers <- v
     
     [<DefaultValue>] val mutable aggregatedBars : DbSet<AggregatedBar>
     member me.AggregatedBars with get() = me.aggregatedBars and set v = me.aggregatedBars <- v
