@@ -86,6 +86,9 @@ let main argv =
                 |> ignore
                 ctx.SaveChanges() |> ignore
 
+            // Since `ctx` is long-lived we have to discard tracked entities manually.
+            ctx.ChangeTracker.Clear()
+
     | cmd -> failwithf $"Unknown command: %s{cmd}"
 
     0
