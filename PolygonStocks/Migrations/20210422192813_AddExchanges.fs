@@ -9,10 +9,55 @@ open Microsoft.EntityFrameworkCore.Migrations
 open Microsoft.EntityFrameworkCore.Storage.ValueConversion
 
 [<DbContext(typeof<Model.PolygonContext>)>]
-type PolygonContextModelSnapshot() =
-    inherit ModelSnapshot()
+[<Migration("20210422192813_AddExchanges")>]
+type AddExchanges() =
+    inherit Migration()
 
-    override this.BuildModel(modelBuilder: ModelBuilder) =
+    override this.Up(migrationBuilder:MigrationBuilder) =
+        migrationBuilder.CreateTable(
+            name = "Exchanges"
+            ,columns = (fun table -> 
+            {|
+                Name =
+                    table.Column<string>(
+                        nullable = false
+                        ,``type`` = "TEXT"
+                    )
+                Mic =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+                Market =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+                Tape =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+                PolygonCode =
+                    table.Column<string>(
+                        nullable = true
+                        ,``type`` = "TEXT"
+                    )
+            |})
+            ,constraints =
+                (fun table -> 
+                    table.PrimaryKey("PK_Exchanges", (fun x -> (x.Name) :> obj)) |> ignore
+                ) 
+        ) |> ignore
+
+
+    override this.Down(migrationBuilder:MigrationBuilder) =
+        migrationBuilder.DropTable(
+            name = "Exchanges"
+            ) |> ignore
+
+
+    override this.BuildTargetModel(modelBuilder: ModelBuilder) =
         modelBuilder
             .HasAnnotation("ProductVersion", "5.0.5")
             |> ignore

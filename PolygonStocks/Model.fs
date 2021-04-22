@@ -1,27 +1,12 @@
 module Model
 
-open System
 open System.ComponentModel.DataAnnotations
-open System.IO
-open System.Text.Json
-open System.Text.Json.Serialization
 
 open Microsoft.EntityFrameworkCore
 open EntityFrameworkCore.FSharp
 
-module Serde =
-    let private jsonOptions = JsonSerializerOptions()
-    do jsonOptions.Converters.Add(JsonFSharpConverter())
-
-    let write (path : string) x =
-        let bytes = JsonSerializer.SerializeToUtf8Bytes(x, jsonOptions)
-        File.WriteAllBytes(path, bytes)
-
-    let read (path : string) =
-        let bytes = File.ReadAllBytes path
-        JsonSerializer.Deserialize(ReadOnlySpan bytes, jsonOptions)
-
-type Exchange = { Name : string
+[<CLIMutable>]
+type Exchange = { [<Key>] Name : string
                   // Defined by ISO 10383, https://en.wikipedia.org/wiki/Market_Identifier_Code.
                   Mic : string option
                   // Eg. equities, currencies, index.
@@ -61,6 +46,9 @@ type QueuedTicker = { [<Key>] Ticker : string }
 type PolygonContext() =  
     inherit DbContext()
 
+    [<DefaultValue>] val mutable exchanges : DbSet<Exchange>
+    member me.Exchanges with get() = me.exchanges and set v = me.exchanges <- v
+
     [<DefaultValue>] val mutable tickers : DbSet<Ticker>
     member me.Tickers with get() = me.tickers and set v = me.tickers <- v
     
@@ -78,6 +66,16 @@ type PolygonContext() =
         and set v = me.queuedTickers <- v
 
     override _.OnModelCreating(mb) =
+        let entity = mb.Entity<Exchange>()
+        entity
+            .Property(fun e -> e.Mic)
+            .HasConversion(OptionConverter())
+        |> ignore
+        entity
+            .Property(fun e -> e.PolygonCode)
+            .HasConversion(OptionConverter())
+        |> ignore
+
         let entity = mb.Entity<AggregatedBar>()
         entity
             .HasKey(fun a -> (a.Ticker, a.TimestampSecs) :> obj)

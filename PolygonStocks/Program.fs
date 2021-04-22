@@ -1,7 +1,6 @@
 ﻿module Program
 
 open System
-open System.IO
 
 open Model
 
@@ -29,15 +28,13 @@ let fetchQueuedTickers (ctx : PolygonContext) =
 let main argv =
     let apiKey = argv.[0]
     
-    let dataDir = "Data"
-    let exchangesFile = Path.Join(dataDir, "exchanges.json")
-
     use ctx = new PolygonContext()
 
     match argv.[1] with
     | "download-exchanges" ->
-        Download.downloadExchanges apiKey
-        |> Serde.write exchangesFile
+        ctx.Exchanges.RemoveRange(ctx.Exchanges)
+        Download.downloadExchanges apiKey |> ctx.Exchanges.AddRange
+        ctx.SaveChanges() |> ignore
     | "download-tickers" ->
         ctx.Tickers.RemoveRange(ctx.Tickers)
         Download.downloadTickers apiKey |> ctx.Tickers.AddRange
