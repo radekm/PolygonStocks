@@ -6,14 +6,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="DesignTimeServices.fs" />
         <Compile Include="Model.fs" />
+        <Compile Include="Migrations/*.fs" />
         <Compile Include="Download.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="EntityFrameworkCore.FSharp" Version="5.0.3-alpha9" />
       <PackageReference Include="FSharp.Data" Version="4.1.0" />
       <PackageReference Include="FSharp.SystemTextJson" Version="0.16.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.5" />
     </ItemGroup>
 
 </Project>
