@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,10 +14,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="EntityFrameworkCore.FSharp" Version="5.0.3-alpha9" />
-      <PackageReference Include="FSharp.Data" Version="4.1.0" />
-      <PackageReference Include="FSharp.SystemTextJson" Version="0.16.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.5" />
+      <PackageReference Include="EntityFrameworkCore.FSharp" Version="6.0.6" />
+      <PackageReference Include="FSharp.Data" Version="4.2.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.5" />
     </ItemGroup>
 
 </Project>
