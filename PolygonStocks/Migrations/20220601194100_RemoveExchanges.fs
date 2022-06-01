@@ -9,10 +9,98 @@ open Microsoft.EntityFrameworkCore.Migrations
 open Microsoft.EntityFrameworkCore.Storage.ValueConversion
 
 [<DbContext(typeof<Model.PolygonContext>)>]
-type PolygonContextModelSnapshot() =
-    inherit ModelSnapshot()
+[<Migration("20220601194100_RemoveExchanges")>]
+type RemoveExchanges() =
+    inherit Migration()
 
-    override this.BuildModel(modelBuilder: ModelBuilder) =
+    override this.Up(migrationBuilder:MigrationBuilder) =
+        migrationBuilder.DropTable(
+            name = "Exchanges"
+            ) |> ignore
+
+        migrationBuilder.AlterColumn<decimal>(
+            name = "PriceWeightedByVolume"
+            ,table = "AggregatedBars"
+            ,``type`` = "TEXT"
+            ,nullable = true
+            ,oldClrType = typedefof<decimal>
+            ,oldType = "TEXT"
+            ,oldNullable = false
+            ) |> ignore
+
+        migrationBuilder.AlterColumn<int>(
+            name = "NumberOfTransactions"
+            ,table = "AggregatedBars"
+            ,``type`` = "INTEGER"
+            ,nullable = true
+            ,oldClrType = typedefof<int>
+            ,oldType = "INTEGER"
+            ,oldNullable = false
+            ) |> ignore
+
+
+    override this.Down(migrationBuilder:MigrationBuilder) =
+        migrationBuilder.AlterColumn<decimal>(
+            name = "PriceWeightedByVolume"
+            ,table = "AggregatedBars"
+            ,``type`` = "TEXT"
+            ,nullable = false
+            ,defaultValue = "0.000000m"
+            ,oldClrType = typedefof<decimal>
+            ,oldType = "TEXT"
+            ,oldNullable = true
+            ) |> ignore
+
+        migrationBuilder.AlterColumn<int>(
+            name = "NumberOfTransactions"
+            ,table = "AggregatedBars"
+            ,``type`` = "INTEGER"
+            ,nullable = false
+            ,defaultValue = "0"
+            ,oldClrType = typedefof<int>
+            ,oldType = "INTEGER"
+            ,oldNullable = true
+            ) |> ignore
+
+        migrationBuilder.CreateTable(
+            name = "Exchanges"
+            ,columns = (fun table -> 
+            {|
+                Name =
+                    table.Column<string>(
+                        nullable = false
+                        ,``type`` = "TEXT"
+                    )
+                Market =
+                    table.Column<string>(
+                        nullable = false
+                        ,``type`` = "TEXT"
+                    )
+                Mic =
+                    table.Column<string>(
+                        nullable = false
+                        ,``type`` = "TEXT"
+                    )
+                PolygonCode =
+                    table.Column<string>(
+                        nullable = false
+                        ,``type`` = "TEXT"
+                    )
+                Tape =
+                    table.Column<string>(
+                        nullable = false
+                        ,``type`` = "TEXT"
+                    )
+            |})
+            , constraints =
+                (fun table -> 
+                    table.PrimaryKey("PK_Exchanges", (fun x -> (x.Name) :> obj)
+                    ) |> ignore
+                )
+        ) |> ignore
+
+
+    override this.BuildTargetModel(modelBuilder: ModelBuilder) =
         modelBuilder.HasAnnotation("ProductVersion", "6.0.5") |> ignore
 
         modelBuilder.Entity("Model+AggregatedBar", (fun b ->

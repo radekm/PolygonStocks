@@ -31,10 +31,6 @@ let main argv =
     use ctx = new PolygonContext()
 
     match argv.[1] with
-    | "download-exchanges" ->
-        ctx.Exchanges.RemoveRange(ctx.Exchanges)
-        Download.downloadExchanges apiKey |> ctx.Exchanges.AddRange
-        ctx.SaveChanges() |> ignore
     | "download-tickers" ->
         ctx.Tickers.RemoveRange(ctx.Tickers)
         Download.downloadTickers apiKey |> ctx.Tickers.AddRange

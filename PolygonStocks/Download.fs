@@ -7,21 +7,6 @@ open FSharp.Data
 
 open Model
 
-type private ExchangesResponse = JsonProvider<"PolygonResponses/ExchangesResponse.json">     
-
-let private downloadRawExchanges (apiKey : string) =
-    Http.RequestString("https://api.polygon.io/v1/meta/exchanges", ["apiKey", apiKey])
-    |> ExchangesResponse.Parse
-    |> Array.filter (fun e -> e.Type = "exchange")
-
-let private convertExchange (e : ExchangesResponse.Root) = { Name = e.Name
-                                                             Mic = e.Mic
-                                                             Market = e.Market
-                                                             Tape = e.Type
-                                                             PolygonCode = e.Code }
-
-let downloadExchanges = downloadRawExchanges >> Array.map convertExchange
-
 type private TickersResponse = JsonProvider<"PolygonResponses/TickersResponse.json", SampleIsList = true>
 
 let rec private requestString (url : string) (query : list<string * string>) =
