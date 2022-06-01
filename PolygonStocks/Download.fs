@@ -22,34 +22,52 @@ let private convertExchange (e : ExchangesResponse.Root) = { Name = e.Name
 
 let downloadExchanges = downloadRawExchanges >> Array.map convertExchange
 
-type private TickersResponse = JsonProvider<"PolygonResponses/TickersResponse.json">     
+type private TickersResponse = JsonProvider<"PolygonResponses/TickersResponse.json", SampleIsList = true>
+
+let rec private requestString (url : string) (query : list<string * string>) =
+    let response = Http.Request(url, query, silentHttpErrors = true)
+    // Too many requests.
+    if response.StatusCode = 429 then
+        printfn "Got code 429 with %A" response.Body
+        printfn "Waiting for %s" url
+        Thread.Sleep(58_000)
+        requestString url query
+    elif response.StatusCode = 200 then
+        match response.Body with
+        | Text s -> s
+        | Binary _ -> failwithf "Request to %s returned binary data" url
+    else
+        failwithf "Unexpected code %d on %s" response.StatusCode url
 
 let private downloadRawTickers (apiKey : string) =
-    let rec go (acc : ResizeArray<_>) (page : int) =
-        let parsed =
-            Http.RequestString(
-                "https://api.polygon.io/v2/reference/tickers",
-                [ "sort", "ticker"
-                  "perpage", "50"; "page", string page
-                  "market", "STOCKS"; "active", "true"
-                  "apiKey", apiKey
-                ])
-            |> TickersResponse.Parse
-        printfn "Downloaded page %d with %d tickers of %d, first ticker %A"
-            page parsed.Tickers.Length parsed.Count
-            (parsed.Tickers |> Array.tryHead |> Option.map (fun t -> t.Ticker))
-        parsed.Tickers |> acc.AddRange
-        if parsed.Tickers.Length >= parsed.PerPage
-        then go acc (page + 1)
-        else acc.ToArray()
+    let tickers = ResizeArray()
 
-    go (ResizeArray()) 1
+    let rec go (lastResponse : string) =
+        let lastResponse = TickersResponse.Parse lastResponse
+        tickers.AddRange(lastResponse.Results)
+        match lastResponse.NextUrl with
+        | Some nextUrl ->
+            let response = requestString nextUrl ["apiKey", apiKey]
+            go response
+        | None -> ()
 
-let private convertTicker (t : TickersResponse.Ticker) = { Ticker = t.Ticker
+    requestString
+        "https://api.polygon.io/v3/reference/tickers"
+        [ "sort", "ticker"
+          "order", "asc"
+          "market", "stocks"
+          "type", "CS"  // Common Stock.
+          "apiKey", apiKey
+        ]
+    |> go
+
+    tickers.ToArray()
+
+let private convertTicker (t : TickersResponse.Result) = { Ticker = t.Ticker
                                                            Name = t.Name
                                                            Locale = t.Locale
-                                                           Currency = t.Currency
-                                                           PrimaryExchange = t.PrimaryExch }
+                                                           Currency = t.CurrencyName
+                                                           PrimaryExchange = t.PrimaryExchange }
 
 let downloadTickers = downloadRawTickers >> Array.map convertTicker
 
