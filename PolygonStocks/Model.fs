@@ -21,7 +21,7 @@ type AggregatedBar = { Ticker : string
                        Highest : decimal
                        Lowest : decimal
                        Close : decimal
-                       Volume : int
+                       Volume : decimal
                        PriceWeightedByVolume : decimal option
                        NumberOfTransactions : int option
                      }

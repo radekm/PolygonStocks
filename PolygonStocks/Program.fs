@@ -38,7 +38,7 @@ let main argv =
     | "download-aggregates" ->
         let fromDay, toDay =
             let toDay = DateTime.UtcNow.Date
-            let fromDay = DateTime(toDay.Year, toDay.Month, 1).AddMonths(-20).Date
+            let fromDay = DateTime(toDay.Year, toDay.Month, 1).AddMonths(-40).Date
             fromDay, toDay
         printfn $"To download %A{fromDay} - %A{toDay}"
 
